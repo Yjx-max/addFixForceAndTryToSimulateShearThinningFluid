@@ -5,6 +5,8 @@ constant/polyMesh/*
 # 可选：忽略表面网格文件（如 STL）
 constant/triSurface/
 
+system/xyz_points.csv
+
 log.pimpleFoam
 
 5/
