@@ -1,0 +1,51 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volVectorField;
+    object      U;
+}
+
+dimensions      [0 1 -1 0 0 0 0];  // 速度量纲（m/s）
+internalField   uniform (0 0 0);   // 初始速度为0
+
+boundaryField
+{
+
+    inlet
+    {
+        type            fixedValue;
+        value           uniform (1e-3 0 0);
+    }
+    outlet
+    {
+        type            zeroGradient;
+    }
+
+    // 上下固定端：无滑移（速度为0）
+    left
+    {
+        type            empty;
+    }
+    right
+    {
+        type            empty;
+    }
+
+    top
+    {
+        type            noSlip;
+    }
+    bottom
+    {
+        type            noSlip;
+    }
+
+    cubes
+    {
+        type            partialSlip;
+        value           uniform (0 0 0);  // 参考速度（通常为壁面速度）
+        slipLength      1e-5;  // 滑移长度（单位m，值越大滑移越显著）
+        valueFraction   uniform 0.5;  
+    }
+}

@@ -1,0 +1,54 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+
+application     icoFoam;  // 选择icoFoam求解器
+
+// 时间控制
+startFrom       startTime;
+startTime       0;
+stopAt          endTime;
+endTime         10;  // 模拟总时间（根据流动特征调整）
+deltaT          0.1;  // 时间步长（需满足CFL条件）
+writeControl    timeStep;
+writeInterval   50;  // 每25步输出一次结果
+
+// 可选：添加监测点或力计算
+functions
+{
+    internalVelocity
+    {
+        type            sets;  // 必须指定类型
+        libs            ("libutilityFunctionObjects.so");
+        enabled         true;
+        writeControl    timeStep;
+        writeInterval   1;
+ 
+        // 指定要输出的字段
+        fields
+        (
+            U
+        );
+        setFormat       csv;  // 输出格式，可以选择 raw, vtk, etc.
+        
+        // 指定要使用的点集
+        sets
+        (
+            interpolatedData
+            {
+                type        cloud;  // 必须指定类型
+                points (
+                    #include "xyz_points.csv"// 加载点集文件，若不在constant文件夹内需指定点（集）云文件路径
+                );
+                axis        xyz;  // 指定点集的轴
+            }
+        );
+ 
+        // 插值方案
+        interpolationScheme cellPoint;
+    }
+}

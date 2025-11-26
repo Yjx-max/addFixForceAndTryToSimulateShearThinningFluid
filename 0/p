@@ -1,0 +1,49 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    object      p;
+}
+dimensions      [0 2 -2 0 0 0 0];  // 压力量纲 (Pa)，这里不对，应该是 [1 -1 -2 0 0 0 0]
+internalField   uniform 0;          // 初始压力为0
+
+boundaryField
+{
+    inlet
+    {
+        type    zeroGradient;  // 入口压力自由发展（因速度已固定）
+    }
+    outlet
+    {
+        type    fixedValue;
+        value   uniform 0;  // 出口压力固定为0（相对大气压）
+    }
+
+    // 周期性边界
+    left
+    {
+        type    empty;
+    }
+    right
+    {
+        type    empty;
+    }
+
+    // 壁面边界
+    bottom
+    {
+        type    fixedFluxPressure;  // 壁面压力通量为0
+    }
+    top
+    {
+        type    fixedFluxPressure;
+    }
+    
+    cubes
+    {
+        type            zeroGradient;  // 压力沿壁面法向梯度为0
+        value           uniform 0;     // 初始值（仅迭代起点用，不影响最终结果）
+    }
+    
+}

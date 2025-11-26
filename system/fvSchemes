@@ -1,0 +1,50 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSchemes;
+}
+
+// 时间离散格式
+ddtSchemes
+{
+    default         Euler;  // 显式欧拉格式（适合瞬态模拟）
+}
+
+// 梯度项离散格式
+gradSchemes
+{
+    default         Gauss linear;  // 线性高斯格式（精度较高）
+    grad(U)         Gauss linear;  
+}
+
+// 对流项离散格式
+divSchemes
+{
+    default         none;  // 默认不指定，需为每个项单独设置
+    div(phi,U)      Gauss linearUpwind grad(U);  // 对流项（动量方程）
+    div(phi,k)      Gauss linearUpwind grad(k);  // 若有湍流模型，可保留
+    div(phi,epsilon) Gauss linearUpwind grad(epsilon);
+    div((nuEff*dev2(T(grad(U))))) Gauss linear;  // 扩散项
+}
+
+// 扩散项离散格式
+laplacianSchemes
+{
+    default         Gauss linear corrected;  // 修正线性格式（平衡精度与稳定性）
+    laplacian(nu,U) Gauss linear corrected;  // 动量扩散项（可选）
+}
+
+// 插值格式
+interpolationSchemes
+{
+    default         linear;  // 线性插值（通用）
+}
+
+// 面法向梯度格式
+snGradSchemes
+{
+    default         corrected;  // 修正格式（适合非正交网格）
+}

@@ -1,0 +1,20 @@
+# 忽略 OpenFOAM 网格文件（关键）
+constant/polyMesh/
+constant/polyMesh/*
+
+# 可选：忽略表面网格文件（如 STL）
+constant/triSurface/
+
+log.pimpleFoam
+
+5/
+10/
+
+5/*
+10/*
+
+# 忽略求解器生成的临时文件
+postProcessing*
+processor*
+log.*
+*.bak

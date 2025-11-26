@@ -1,0 +1,153 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      snappyHexMeshDict;
+}
+
+geometry
+{
+    array.stl
+    {
+        type triSurfaceMesh;
+        name cubes;
+    }
+};
+
+castellatedMesh true;
+snap true;
+addLayers true;
+
+// 网格质量控制（完整）
+meshQualityControls
+{
+    maxNonOrtho     65;
+    maxBoundarySkewness 20;
+    maxInternalSkewness 4;
+    maxConcave      80;
+    minVol          1e-13;
+    minTetQuality   1e-9;
+    minTriangleTwist 0.02;
+    minArea         -1;
+    minTwist        0.02;
+    minDeterminant  1e-10;
+    minFaceWeight   0.02;
+    minVolRatio     0.01;
+    nSmoothScale    4;
+    errorReduction  0.75;
+}
+
+// 切割控制（重点：保护周期性边界）
+castellatedMeshControls
+{
+    maxLocalCells   1000000;
+    maxGlobalCells  10000000;
+    minRefinementCells 0;
+    nCellsBetweenLevels 10;
+
+    features ();  // 空，用STL自动特征
+
+    resolveFeatureAngle 30;
+
+    // 细化表面：仅细化固体，周期性边界设为keep
+    refinementSurfaces
+    {
+        // 固体表面（正常细化）
+        cubes
+        {
+            level       (3 4);
+            patchType   wall;
+            name        solidSurface;  // 统一命名为solidSurface
+        }
+
+        top
+        {
+            level       (3 4);
+            patchType   wall;
+            name        solidSurface;  // 统一命名为solidSurface
+        }
+
+        bottom
+        {
+            level       (3 4);
+            patchType   wall;
+            name        solidSurface;  // 统一命名为solidSurface
+        }
+
+        inlet
+        {
+            level       (0 0);  // 细化等级0
+            patchType   keep;   // 保留原始类型和结构
+        }
+        outlet
+        {
+            level       (0 0);
+            patchType   keep;
+        }
+
+        left
+        {
+            level       (0 0);
+            patchType   keep;
+        }
+        rihgt
+        {
+            level       (0 0);
+            patchType   keep;
+        }
+    }
+
+    refinementRegions {};  // 空
+
+    allowFreeStandingZoneFaces true;
+    allowBoundaryLayerGaps false;  // 禁止周期性边界处的边界层间隙
+    locationInMesh (2.5 0.1 1.5);  // 计算域中心（确保在流体区）
+}
+
+// 贴合控制（完整）
+snapControls
+{
+    nSmoothPatch 3;
+    tolerance 2.0;
+    nSolveIter 30;
+    nRelaxIter 5;
+    nFeatureSnapIter 10;
+    implicitFeatureSnap false;
+    explicitFeatureSnap true;
+    multiRegionFeatureSnap false;
+    mergeTolerance 1e-6;
+}
+
+// 边界层控制（仅在固体表面生成）
+addLayersControls
+{
+    layers
+    {
+        solidSurface  // 仅对固体表面生成边界层
+        {
+            nSurfaceLayers 3;
+        }
+    }
+
+    expansionRatio  1.2;
+    relativeSizes   true;
+    finalLayerThickness 0.3;
+    minThickness    0.001;
+    nGrow           0;
+    nBufferCellsNoExtrude 0;
+    nLayerIter      50;
+    featureAngle    130;
+    nRelaxIter      3;
+    nSmoothSurfaceNormals 1;
+    nSmoothNormals  3;
+    nSmoothThickness 10;
+    maxFaceThicknessRatio 0.5;
+    maxThicknessToMedialRatio 0.3;
+    minMedialAxisAngle 90;
+    excludedPatches (inlet outlet left right top bottom);  // 排除所有非固体边界
+}
+
+writeFlags (scalarLevels layerSets layerFields);
+debug 0;
+mergeTolerance 1e-6;

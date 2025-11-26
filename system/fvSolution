@@ -1,0 +1,56 @@
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSolution;
+}
+
+// 求解器设置（速度U、压力p）
+solvers
+{
+    // 速度场 U 求解器
+    U
+    {
+        solver          smoothSolver;  // 平滑迭代求解器（高效稳定）
+        smoother        symGaussSeidel; // 对称高斯-赛德尔平滑器
+        tolerance       1e-8;          // 绝对收敛容差（残差低于此值视为收敛）
+        relTol          0.1;           // 相对收敛容差（残差下降10倍即可）
+    }
+
+    p
+    {
+        solver          GAMG;          // 几何多重网格法（适用于结构化网格，速度快）
+        smoother        GaussSeidel;   // 高斯-赛德尔平滑器
+        tolerance       1e-7;          // 压力收敛容差（比速度宽松一个量级）
+        relTol          0.05;          // 压力相对收敛容差
+        nCellsInCoarsestLevel 20;      // 最粗网格层的最小单元格数（适配网格规模）
+        cacheAgglomeration on;         // 缓存聚集信息（加速求解）
+        agglomerator    faceAreaPair;  // 聚集算法（面面积配对，适合结构化网格）
+        mergeLevels     1;             // 合并层级（减少网格层数）
+    }
+
+    // 最终压力修正（确保收敛精度）
+    pFinal
+    {
+        $p;          // 继承 p_rgh 的设置
+        relTol          0;             // 最终迭代需严格收敛（相对容差设为0）
+    }
+
+    // 最终速度修正
+    UFinal
+    {
+        $U;              // 继承 U 的设置
+        relTol          0;             // 最终迭代严格收敛
+    }
+}
+
+PIMPLE
+{
+    nOuterCorrectors 1;         // 外迭代次数（层流1-2次足够）
+    nCorrectors     2;              // 压力修正次数（2次足够保证精度）
+    nNonOrthogonalCorrectors 0;     // 非正交修正次数（结构化网格非正交性低，设为0）
+    pRefCell        0;          // 参考压力单元格（默认0）
+    pRefValue       0;          // 参考压力值（0 Pa）
+}
